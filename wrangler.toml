@@ -1,9 +1,6 @@
 name = "neoxppro"
 compatibility_date = "2026-04-03"
 
-[vars]
-VITE_API_BASE_URL = "https://neoxppro-production.up.railway.app"
-
 [assets]
 directory = "./dist/public"
 not_found_handling = "single-page-application"
