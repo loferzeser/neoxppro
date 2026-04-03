@@ -1,3 +1,0 @@
-# Cloudflare Pages — SPA fallback (copied to dist root by Vite)
-# Real files under /assets/* are served first; everything else serves the app shell.
-/* /index.html 200
