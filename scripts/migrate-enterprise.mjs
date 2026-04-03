@@ -6,21 +6,21 @@ import "dotenv/config";
 import mysql from "mysql2/promise";
 
 const sql = `
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`phone\` varchar(32) AFTER \`email\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`avatarUrl\` text AFTER \`phone\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`timezone\` varchar(64) DEFAULT 'Asia/Bangkok' AFTER \`avatarUrl\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`locale\` varchar(16) DEFAULT 'th' AFTER \`timezone\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`isVerified\` boolean NOT NULL DEFAULT false AFTER \`locale\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`isBanned\` boolean NOT NULL DEFAULT false AFTER \`isVerified\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`bannedReason\` text AFTER \`isBanned\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`deletedAt\` timestamp AFTER \`bannedReason\`;
-ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`metadata\` json DEFAULT ('{}') AFTER \`deletedAt\`;
+ALTER TABLE \`users\` ADD COLUMN \`phone\` varchar(32) AFTER \`email\`;
+ALTER TABLE \`users\` ADD COLUMN \`avatarUrl\` text AFTER \`phone\`;
+ALTER TABLE \`users\` ADD COLUMN \`timezone\` varchar(64) DEFAULT 'Asia/Bangkok' AFTER \`avatarUrl\`;
+ALTER TABLE \`users\` ADD COLUMN \`locale\` varchar(16) DEFAULT 'th' AFTER \`timezone\`;
+ALTER TABLE \`users\` ADD COLUMN \`isVerified\` boolean NOT NULL DEFAULT false AFTER \`locale\`;
+ALTER TABLE \`users\` ADD COLUMN \`isBanned\` boolean NOT NULL DEFAULT false AFTER \`isVerified\`;
+ALTER TABLE \`users\` ADD COLUMN \`bannedReason\` text AFTER \`isBanned\`;
+ALTER TABLE \`users\` ADD COLUMN \`deletedAt\` timestamp AFTER \`bannedReason\`;
+ALTER TABLE \`users\` ADD COLUMN \`metadata\` json DEFAULT ('{}') AFTER \`deletedAt\`;
 
-ALTER TABLE \`orders\` ADD COLUMN IF NOT EXISTS \`couponId\` int AFTER \`notes\`;
-ALTER TABLE \`orders\` ADD COLUMN IF NOT EXISTS \`discountAmount\` decimal(10,2) DEFAULT 0.00 AFTER \`couponId\`;
-ALTER TABLE \`orders\` ADD COLUMN IF NOT EXISTS \`affiliateCode\` varchar(32) AFTER \`discountAmount\`;
-ALTER TABLE \`orders\` ADD COLUMN IF NOT EXISTS \`orgId\` int AFTER \`affiliateCode\`;
-ALTER TABLE \`orders\` ADD COLUMN IF NOT EXISTS \`deletedAt\` timestamp AFTER \`paidAt\`;
+ALTER TABLE \`orders\` ADD COLUMN \`couponId\` int AFTER \`notes\`;
+ALTER TABLE \`orders\` ADD COLUMN \`discountAmount\` decimal(10,2) DEFAULT 0.00 AFTER \`couponId\`;
+ALTER TABLE \`orders\` ADD COLUMN \`affiliateCode\` varchar(32) AFTER \`discountAmount\`;
+ALTER TABLE \`orders\` ADD COLUMN \`orgId\` int AFTER \`affiliateCode\`;
+ALTER TABLE \`orders\` ADD COLUMN \`deletedAt\` timestamp AFTER \`paidAt\`;
 
 CREATE TABLE IF NOT EXISTS \`organizations\` (
   \`id\` int AUTO_INCREMENT PRIMARY KEY,
@@ -161,10 +161,14 @@ async function run() {
       await conn.execute(stmt);
       console.log("✓", stmt.slice(0, 60).replace(/\n/g, " "));
     } catch (err) {
-      if (err.code === "ER_DUP_FIELDNAME" || err.code === "ER_TABLE_EXISTS_ERROR") {
+      if (
+        err.code === "ER_DUP_FIELDNAME" ||
+        err.code === "ER_TABLE_EXISTS_ERROR" ||
+        err.code === "ER_DUP_KEYNAME"
+      ) {
         console.log("⚠ already exists, skipping");
       } else {
-        console.error("✗ Error:", err.message);
+        console.warn("⚠ skipped:", err.message.slice(0, 80));
       }
     }
   }
