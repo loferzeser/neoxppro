@@ -183,7 +183,7 @@ export const securityRouter = router({
   blockIp: systemSettingsProcedure
     .input(
       z.object({
-        ip: z.string().ip(),
+        ip: z.string().regex(/^(\d{1,3}\.){3}\d{1,3}$|^[0-9a-fA-F:]+$/),
         reason: z.string(),
         expiresAt: z.string().optional(),
       })
