@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1774843896146,
+      "tag": "0000_tired_venom",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1774844126926,
+      "tag": "0001_crazy_prowler",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774845000000,
+      "tag": "0002_ea_features",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1775000000000,
+      "tag": "0003_rental_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1775100000000,
+      "tag": "0004_hybrid_auth",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1775200000000,
+      "tag": "0005_admin_control_plane",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# NEOXP Store robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://neoxp.shop/sitemap.xml

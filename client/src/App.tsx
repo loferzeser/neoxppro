@@ -1,0 +1,113 @@
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "@/pages/NotFound";
+import { Redirect, Route, Router, Switch } from "wouter";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import Home from "./pages/Home";
+import Shop from "./pages/Shop";
+import ProductDetail from "./pages/ProductDetail";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
+import Dashboard from "./pages/Dashboard";
+import Admin from "./pages/Admin";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import AuthPage from "./pages/Auth";
+import { AIChatWidget } from "./components/AIChatWidget";
+import TermsPage from "./pages/legal/Terms";
+import PrivacyPage from "./pages/legal/Privacy";
+import RefundPage from "./pages/legal/Refund";
+import CookiesPage from "./pages/legal/Cookies";
+import RiskDisclosurePage from "./pages/legal/RiskDisclosure";
+import AffiliatePage from "./pages/Affiliate";
+
+function AppRoutes() {
+  const base = import.meta.env.BASE_URL;
+  const routerBase =
+    base === "/" || base === "" ? undefined : base.replace(/\/$/, "") || undefined;
+
+  return (
+    <Router {...(routerBase ? { base: routerBase } : {})}>
+      <Switch>
+        <Route path="/" component={Home} />
+
+        {/* Trailing slashes → canonical paths (must be before /shop/:slug) */}
+        <Route path="/shop/">
+          <Redirect to="/shop" replace />
+        </Route>
+        <Route path="/cart/">
+          <Redirect to="/cart" replace />
+        </Route>
+        <Route path="/checkout/">
+          <Redirect to="/checkout" replace />
+        </Route>
+        <Route path="/about/">
+          <Redirect to="/about" replace />
+        </Route>
+        <Route path="/contact/">
+          <Redirect to="/contact" replace />
+        </Route>
+        <Route path="/dashboard/">
+          <Redirect to="/dashboard" replace />
+        </Route>
+        <Route path="/admin/">
+          <Redirect to="/admin" replace />
+        </Route>
+        <Route path="/terms/">
+          <Redirect to="/terms" replace />
+        </Route>
+        <Route path="/privacy/">
+          <Redirect to="/privacy" replace />
+        </Route>
+        <Route path="/refund/">
+          <Redirect to="/refund" replace />
+        </Route>
+        <Route path="/cookies/">
+          <Redirect to="/cookies" replace />
+        </Route>
+        <Route path="/risk/">
+          <Redirect to="/risk" replace />
+        </Route>
+
+        <Route path="/shop" component={Shop} />
+        <Route path="/shop/:slug" component={ProductDetail} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/order-success/:orderNumber" component={OrderSuccess} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard/orders" component={Dashboard} />
+        <Route path="/dashboard/settings" component={Dashboard} />
+        <Route path="/admin" component={Admin} />
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/terms" component={TermsPage} />
+        <Route path="/privacy" component={PrivacyPage} />
+        <Route path="/refund" component={RefundPage} />
+        <Route path="/cookies" component={CookiesPage} />
+        <Route path="/risk" component={RiskDisclosurePage} />
+        <Route path="/affiliate" component={AffiliatePage} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Router>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark">
+        <TooltipProvider>
+          <Toaster />
+          <AppRoutes />
+          <AIChatWidget />
+        </TooltipProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;
