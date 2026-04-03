@@ -5,23 +5,26 @@
 import "dotenv/config";
 import mysql from "mysql2/promise";
 
-const sql = `
-ALTER TABLE \`users\` ADD COLUMN \`phone\` varchar(32) AFTER \`email\`;
-ALTER TABLE \`users\` ADD COLUMN \`avatarUrl\` text AFTER \`phone\`;
-ALTER TABLE \`users\` ADD COLUMN \`timezone\` varchar(64) DEFAULT 'Asia/Bangkok' AFTER \`avatarUrl\`;
-ALTER TABLE \`users\` ADD COLUMN \`locale\` varchar(16) DEFAULT 'th' AFTER \`timezone\`;
-ALTER TABLE \`users\` ADD COLUMN \`isVerified\` boolean NOT NULL DEFAULT false AFTER \`locale\`;
-ALTER TABLE \`users\` ADD COLUMN \`isBanned\` boolean NOT NULL DEFAULT false AFTER \`isVerified\`;
-ALTER TABLE \`users\` ADD COLUMN \`bannedReason\` text AFTER \`isBanned\`;
-ALTER TABLE \`users\` ADD COLUMN \`deletedAt\` timestamp AFTER \`bannedReason\`;
-ALTER TABLE \`users\` ADD COLUMN \`metadata\` json DEFAULT ('{}') AFTER \`deletedAt\`;
+async function columnExists(conn, table, column) {
+  const dbName = new URL(process.env.DATABASE_URL.replace("mysql://", "http://")).pathname.slice(1);
+  const [rows] = await conn.execute(
+    `SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+    [dbName, table, column]
+  );
+  return rows[0].cnt > 0;
+}
 
-ALTER TABLE \`orders\` ADD COLUMN \`couponId\` int AFTER \`notes\`;
-ALTER TABLE \`orders\` ADD COLUMN \`discountAmount\` decimal(10,2) DEFAULT 0.00 AFTER \`couponId\`;
-ALTER TABLE \`orders\` ADD COLUMN \`affiliateCode\` varchar(32) AFTER \`discountAmount\`;
-ALTER TABLE \`orders\` ADD COLUMN \`orgId\` int AFTER \`affiliateCode\`;
-ALTER TABLE \`orders\` ADD COLUMN \`deletedAt\` timestamp AFTER \`paidAt\`;
+async function addColumnIfMissing(conn, table, column, definition) {
+  const exists = await columnExists(conn, table, column);
+  if (exists) {
+    console.log(`⚠ ${table}.${column} already exists, skipping`);
+    return;
+  }
+  await conn.execute(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+  console.log(`✓ Added ${table}.${column}`);
+}
 
+const createTables = `
 CREATE TABLE IF NOT EXISTS \`organizations\` (
   \`id\` int AUTO_INCREMENT PRIMARY KEY,
   \`slug\` varchar(64) NOT NULL UNIQUE,
@@ -32,7 +35,7 @@ CREATE TABLE IF NOT EXISTS \`organizations\` (
   \`isActive\` boolean NOT NULL DEFAULT true,
   \`ownerId\` int NOT NULL,
   \`metadata\` json DEFAULT ('{}'),
-  \`deletedAt\` timestamp,
+  \`deletedAt\` timestamp NULL,
   \`createdAt\` timestamp NOT NULL DEFAULT NOW(),
   \`updatedAt\` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
 );
@@ -58,8 +61,8 @@ CREATE TABLE IF NOT EXISTS \`coupons\` (
   \`usageCount\` int NOT NULL DEFAULT 0,
   \`perUserLimit\` int NOT NULL DEFAULT 1,
   \`isActive\` boolean NOT NULL DEFAULT true,
-  \`startsAt\` timestamp,
-  \`expiresAt\` timestamp,
+  \`startsAt\` timestamp NULL,
+  \`expiresAt\` timestamp NULL,
   \`createdBy\` int,
   \`createdAt\` timestamp NOT NULL DEFAULT NOW(),
   \`updatedAt\` timestamp NOT NULL DEFAULT NOW() ON UPDATE NOW()
@@ -95,7 +98,7 @@ CREATE TABLE IF NOT EXISTS \`affiliate_conversions\` (
   \`orderId\` int,
   \`commissionAmount\` decimal(10,2) NOT NULL,
   \`status\` enum('pending','approved','paid','rejected') NOT NULL DEFAULT 'pending',
-  \`paidAt\` timestamp,
+  \`paidAt\` timestamp NULL,
   \`createdAt\` timestamp NOT NULL DEFAULT NOW()
 );
 
@@ -109,7 +112,7 @@ CREATE TABLE IF NOT EXISTS \`email_queue\` (
   \`attempts\` int NOT NULL DEFAULT 0,
   \`lastError\` text,
   \`scheduledAt\` timestamp NOT NULL DEFAULT NOW(),
-  \`sentAt\` timestamp,
+  \`sentAt\` timestamp NULL,
   \`createdAt\` timestamp NOT NULL DEFAULT NOW()
 );
 
@@ -130,7 +133,7 @@ CREATE TABLE IF NOT EXISTS \`ip_blocklist\` (
   \`ip\` varchar(64) NOT NULL UNIQUE,
   \`reason\` text,
   \`blockedBy\` int,
-  \`expiresAt\` timestamp,
+  \`expiresAt\` timestamp NULL,
   \`createdAt\` timestamp NOT NULL DEFAULT NOW()
 );
 
@@ -153,26 +156,40 @@ CREATE TABLE IF NOT EXISTS \`audit_logs\` (
 async function run() {
   const conn = await mysql.createConnection(process.env.DATABASE_URL);
   console.log("Connected to MySQL");
-  
-  const statements = sql.split(";").map(s => s.trim()).filter(Boolean);
-  
+
+  // --- ALTER TABLE: users ---
+  await addColumnIfMissing(conn, "users", "phone", "varchar(32) NULL AFTER `email`");
+  await addColumnIfMissing(conn, "users", "avatarUrl", "text NULL AFTER `phone`");
+  await addColumnIfMissing(conn, "users", "timezone", "varchar(64) DEFAULT 'Asia/Bangkok' AFTER `avatarUrl`");
+  await addColumnIfMissing(conn, "users", "locale", "varchar(16) DEFAULT 'th' AFTER `timezone`");
+  await addColumnIfMissing(conn, "users", "isVerified", "boolean NOT NULL DEFAULT false AFTER `locale`");
+  await addColumnIfMissing(conn, "users", "isBanned", "boolean NOT NULL DEFAULT false AFTER `isVerified`");
+  await addColumnIfMissing(conn, "users", "bannedReason", "text NULL AFTER `isBanned`");
+  await addColumnIfMissing(conn, "users", "deletedAt", "timestamp NULL AFTER `bannedReason`");
+  await addColumnIfMissing(conn, "users", "metadata", "json NULL AFTER `deletedAt`");
+
+  // --- ALTER TABLE: orders ---
+  await addColumnIfMissing(conn, "orders", "couponId", "int NULL AFTER `notes`");
+  await addColumnIfMissing(conn, "orders", "discountAmount", "decimal(10,2) DEFAULT 0.00 AFTER `couponId`");
+  await addColumnIfMissing(conn, "orders", "affiliateCode", "varchar(32) NULL AFTER `discountAmount`");
+  await addColumnIfMissing(conn, "orders", "orgId", "int NULL AFTER `affiliateCode`");
+  await addColumnIfMissing(conn, "orders", "deletedAt", "timestamp NULL AFTER `paidAt`");
+
+  // --- CREATE new tables ---
+  const statements = createTables.split(";").map(s => s.trim()).filter(Boolean);
   for (const stmt of statements) {
     try {
       await conn.execute(stmt);
       console.log("✓", stmt.slice(0, 60).replace(/\n/g, " "));
     } catch (err) {
-      if (
-        err.code === "ER_DUP_FIELDNAME" ||
-        err.code === "ER_TABLE_EXISTS_ERROR" ||
-        err.code === "ER_DUP_KEYNAME"
-      ) {
+      if (err.code === "ER_TABLE_EXISTS_ERROR" || err.code === "ER_DUP_KEYNAME") {
         console.log("⚠ already exists, skipping");
       } else {
-        console.warn("⚠ skipped:", err.message.slice(0, 80));
+        console.warn("✗ Error:", err.message.slice(0, 120));
       }
     }
   }
-  
+
   await conn.end();
   console.log("Migration complete!");
 }

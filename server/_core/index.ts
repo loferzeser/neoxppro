@@ -37,6 +37,7 @@ async function startServer() {
   const server = createServer(app);
   app.set("trust proxy", process.env.TRUST_PROXY ? Number(process.env.TRUST_PROXY) || 1 : 1);
   const corsAllowlist = getAllowedOrigins();
+  console.log("[CORS] Allowed origins:", corsAllowlist);
 
   // ===== STRIPE WEBHOOK (must be before express.json) =====
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
