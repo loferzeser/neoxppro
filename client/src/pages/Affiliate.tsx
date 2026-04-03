@@ -11,7 +11,7 @@ export default function AffiliatePage() {
   const { data: stats, refetch } = trpc.affiliates.myStats.useQuery(undefined, {
     enabled: isAuthenticated,
   });
-  const apply = trpc.affiliates.apply.useMutation({
+  const apply = trpc.affiliates.register.useMutation({
     onSuccess: () => { toast.success("สมัครสำเร็จ! รอการอนุมัติ"); refetch(); },
     onError: (e) => toast.error(e.message),
   });

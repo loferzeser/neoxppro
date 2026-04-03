@@ -83,7 +83,7 @@ export const couponRouter = router({
 
 // ===== AFFILIATE ROUTER =====
 export const affiliateRouter = router({
-  apply: protectedProcedure.mutation(async ({ ctx }) => {
+  register: protectedProcedure.mutation(async ({ ctx }) => {
     return applyForAffiliate(ctx.user.id);
   }),
 
