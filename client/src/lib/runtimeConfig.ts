@@ -1,10 +1,10 @@
 export function getApiBaseUrl() {
-  return (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+  const url = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+  return url;
 }
 
 export function getApiUrl(path: string) {
-  const normalized = path.startsWith("/") ? path : `/${path}`;
   const base = getApiBaseUrl();
-  return `${base}${normalized}`.replace(/^\/api\//, "/api/");
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalized}`;
 }
-
