@@ -12,7 +12,7 @@ CREATE TABLE `product_assets` (
   `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `product_assets_id` PRIMARY KEY(`id`)
 );
-
+--> statement-breakpoint
 CREATE TABLE `product_licenses` (
   `id` int AUTO_INCREMENT NOT NULL,
   `orderItemId` int NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE `product_licenses` (
   CONSTRAINT `product_licenses_id` PRIMARY KEY(`id`),
   CONSTRAINT `product_licenses_licenseKey_unique` UNIQUE(`licenseKey`)
 );
-
+--> statement-breakpoint
 CREATE TABLE `webhook_events` (
   `id` int AUTO_INCREMENT NOT NULL,
   `provider` varchar(64) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE `webhook_events` (
   `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `webhook_events_id` PRIMARY KEY(`id`)
 );
-
+--> statement-breakpoint
 CREATE TABLE `integration_health_checks` (
   `id` int AUTO_INCREMENT NOT NULL,
   `service` varchar(64) NOT NULL,
@@ -49,4 +49,3 @@ CREATE TABLE `integration_health_checks` (
   CONSTRAINT `integration_health_checks_id` PRIMARY KEY(`id`),
   CONSTRAINT `integration_health_checks_service_unique` UNIQUE(`service`)
 );
-
