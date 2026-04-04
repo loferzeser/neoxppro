@@ -209,14 +209,20 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+const resolveApiUrl = () => {
+  // ใช้ OpenRouter แทน Forge
+  if (ENV.openRouterApiKey) {
+    return "https://openrouter.ai/api/v1/chat/completions";
+  }
+  // Fallback to Forge
+  return ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
     ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
     : "https://forge.manus.im/v1/chat/completions";
+};
 
 const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+  if (!ENV.openRouterApiKey && !ENV.forgeApiKey) {
+    throw new Error("OPENROUTER_API_KEY or OPENAI_API_KEY is not configured");
   }
 };
 
@@ -280,7 +286,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: ENV.openRouterApiKey ? "qwen/qwen-3.6-plus-preview:free" : "gemini-2.5-flash",
     messages: messages.map(normalizeMessage),
   };
 
@@ -297,8 +303,12 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   }
 
   payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
+  
+  // Thinking budget only for Forge models
+  if (!ENV.openRouterApiKey) {
+    payload.thinking = {
+      "budget_tokens": 128
+    }
   }
 
   const normalizedResponseFormat = normalizeResponseFormat({
@@ -316,7 +326,11 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${ENV.openRouterApiKey || ENV.forgeApiKey}`,
+      ...(ENV.openRouterApiKey ? {
+        "HTTP-Referer": "https://neoxp.shop",
+        "X-Title": "NEOXP Store AI Assistant"
+      } : {})
     },
     body: JSON.stringify(payload),
   });
