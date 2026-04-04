@@ -21,15 +21,18 @@ export async function getMarketData(): Promise<TickerData[]> {
   
   // ใช้ cache ถ้ายังไม่หมดอายุ
   if (cachedData && now - lastFetch < CACHE_DURATION) {
+    console.log("[Market Data] Using cached data");
     return cachedData;
   }
 
   // ถ้าไม่มี API key ใช้ fallback
   if (!TWELVE_DATA_KEY) {
-    console.warn("TWELVE_DATA_API_KEY not set, using fallback data");
+    console.warn("[Market Data] TWELVE_DATA_API_KEY not set, using fallback data");
     return getFallbackData();
   }
 
+  console.log("[Market Data] Fetching from Twelve Data API...");
+  
   try {
     // ดึงข้อมูลจริงจาก Twelve Data (รองรับ batch request)
     const symbols = [
@@ -39,15 +42,30 @@ export async function getMarketData(): Promise<TickerData[]> {
     ];
     
     const url = `${BASE_URL}/quote?symbol=${symbols.join(",")}&apikey=${TWELVE_DATA_KEY}`;
+    console.log("[Market Data] Fetching symbols:", symbols.join(","));
+    
     const res = await fetch(url);
     const json = await res.json();
+    
+    console.log("[Market Data] API Status:", res.status);
+    console.log("[Market Data] API Response keys:", Object.keys(json));
+    console.log("[Market Data] Full Response:", JSON.stringify(json, null, 2));
+    
+    // Check for API error
+    if (json.status === "error" || json.code) {
+      console.error("[Market Data] API Error:", json.message || json);
+      throw new Error(json.message || "API returned error");
+    }
     
     // Twelve Data returns object with symbol keys for batch requests
     const data: TickerData[] = [];
     
     for (const symbol of symbols) {
       const quote = json[symbol];
-      if (!quote || quote.code === 400) continue;
+      if (!quote || quote.code === 400) {
+        console.warn(`[Market Data] No data for ${symbol}`);
+        continue;
+      }
       
       const price = parseFloat(quote.close || quote.price || "0");
       const change = parseFloat(quote.percent_change || "0");
@@ -68,14 +86,16 @@ export async function getMarketData(): Promise<TickerData[]> {
     }
 
     if (data.length === 0) {
+      console.error("[Market Data] No data received from API");
       throw new Error("No data received from API");
     }
 
+    console.log(`[Market Data] Successfully fetched ${data.length} symbols`);
     cachedData = data;
     lastFetch = now;
     return data;
   } catch (error) {
-    console.error("Market data fetch error:", error);
+    console.error("[Market Data] Fetch error:", error);
     // Fallback เป็นข้อมูลสมมติถ้า API ล้ม
     return getFallbackData();
   }
