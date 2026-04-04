@@ -324,6 +324,19 @@ export default function Home() {
                 <p className="text-white/50 text-xs mt-0.5">1,400+ นักเทรดไว้วางใจ</p>
               </div>
             </div>
+
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <p className="text-white/40 text-xs">
+                การเทรดมีความเสี่ยง โปรดศึกษาข้อมูลก่อนตัดสินใจลงทุน | {" "}
+                <Link href="/privacy" className="text-[#ccff00] hover:underline">
+                  นโยบายความเป็นส่วนตัว
+                </Link>
+                {" | "}
+                <Link href="/terms" className="text-[#ccff00] hover:underline">
+                  ข้อกำหนดการใช้งาน
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </section>

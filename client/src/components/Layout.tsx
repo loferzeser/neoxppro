@@ -360,7 +360,12 @@ function Footer() {
         </div>
         <div className="section-divider my-8" />
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-white/30 text-xs">© 2026 NEOXP Store. All rights reserved.</p>
+          <p className="text-white/30 text-xs">
+            © 2026 NEOXP Store. All rights reserved. | {" "}
+            <a href="https://neoxp.shop/#/privacy" className="text-white/40 hover:text-[#ccff00] transition-colors">
+              Privacy Policy
+            </a>
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link href="/privacy" className="text-white/40 text-xs hover:text-[#ccff00] transition-colors">
               ความเป็นส่วนตัว
