@@ -35,6 +35,7 @@ const sortOptions = [
 ];
 
 export default function Shop() {
+  console.log("[Shop] Component rendering");
   const searchStr = useSearch();
   const params = new URLSearchParams(searchStr);
   const [search, setSearch] = useState(params.get("q") ?? "");
@@ -43,6 +44,7 @@ export default function Shop() {
   const [sort, setSort] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
 
+  console.log("[Shop] Calling trpc.products.list");
   const { data: products, isLoading, isError } = trpc.products.list.useQuery({
     search: search || undefined,
     category: category || undefined,

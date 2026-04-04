@@ -25,9 +25,12 @@ import RiskDisclosurePage from "./pages/legal/RiskDisclosure";
 import AffiliatePage from "./pages/Affiliate";
 
 function AppRoutes() {
+  console.log("[AppRoutes] Rendering");
   const base = import.meta.env.BASE_URL;
   const routerBase =
     base === "/" || base === "" ? undefined : base.replace(/\/$/, "") || undefined;
+
+  console.log("[AppRoutes] BASE_URL:", base, "routerBase:", routerBase);
 
   return (
     <Router {...(routerBase ? { base: routerBase } : {})}>
@@ -98,15 +101,24 @@ function AppRoutes() {
 }
 
 function App() {
+  console.log("[App] Component rendering");
   const [hasError, setHasError] = React.useState(false);
 
   React.useEffect(() => {
+    console.log("[App] Mounted");
     const handleError = (event: ErrorEvent) => {
       console.error("[Global Error]", event.error);
       setHasError(true);
     };
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error("[Unhandled Promise Rejection]", event.reason);
+    };
     window.addEventListener("error", handleError);
-    return () => window.removeEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    return () => {
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
   }, []);
 
   if (hasError) {
@@ -117,6 +129,7 @@ function App() {
     );
   }
 
+  console.log("[App] Rendering children");
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">

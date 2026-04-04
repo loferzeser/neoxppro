@@ -53,12 +53,16 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
+console.log("[main.tsx] Starting app initialization");
+console.log("[main.tsx] API URL:", getApiUrl("/api/trpc"));
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
       url: getApiUrl("/api/trpc"),
       transformer: superjson,
       fetch(input, init) {
+        console.log("[tRPC] Fetching:", input);
         return globalThis.fetch(input, {
           ...(init ?? {}),
           credentials: "include",
@@ -68,10 +72,25 @@ const trpcClient = trpc.createClient({
   ],
 });
 
-createRoot(document.getElementById("root")!).render(
-  <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </trpc.Provider>
-);
+console.log("[main.tsx] tRPC client created");
+
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  console.error("[main.tsx] FATAL: #root element not found!");
+  document.body.innerHTML = '<div style="color:white;padding:20px;">FATAL: #root not found</div>';
+} else {
+  console.log("[main.tsx] Root element found, rendering...");
+  try {
+    createRoot(rootElement).render(
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </trpc.Provider>
+    );
+    console.log("[main.tsx] React render initiated");
+  } catch (err) {
+    console.error("[main.tsx] Render error:", err);
+    document.body.innerHTML = `<div style="color:white;padding:20px;">Render Error: ${err}</div>`;
+  }
+}

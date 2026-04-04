@@ -377,6 +377,7 @@ function Footer() {
 
 // ===== MAIN LAYOUT =====
 export default function Layout({ children }: { children: React.ReactNode }) {
+  console.log("[Layout] Rendering");
   const [riskDismissed, setRiskDismissed] = useState(() => {
     if (typeof window === "undefined") return true;
     try {
