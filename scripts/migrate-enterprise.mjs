@@ -192,6 +192,38 @@ async function run() {
 
   await conn.end();
   console.log("Migration complete!");
+
+  // Create default admin user
+  console.log("\n=== Creating default admin user ===");
+  const adminConn = await mysql.createConnection(process.env.DATABASE_URL);
+  const adminEmail = "admin@neoxp.shop";
+  
+  try {
+    const [existingAdmin] = await adminConn.execute(
+      "SELECT id FROM users WHERE email = ?",
+      [adminEmail]
+    );
+
+    if (existingAdmin.length === 0) {
+      await adminConn.execute(
+        "INSERT INTO users (email, name, role, isVerified, isBanned, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
+        [adminEmail, "Admin User", "super_admin", true, false, new Date()]
+      );
+      console.log("✓ Admin user created:", adminEmail);
+    } else {
+      await adminConn.execute(
+        "UPDATE users SET role = ?, isVerified = ?, isBanned = ? WHERE email = ?",
+        ["super_admin", true, false, adminEmail]
+      );
+      console.log("✓ Admin user updated:", adminEmail);
+    }
+    console.log("Login with Google using:", adminEmail);
+  } catch (err) {
+    console.warn("⚠ Admin user setup failed:", err.message);
+  } finally {
+    await adminConn.end();
+  }
+  console.log("=== Setup complete ===\n");
 }
 
 run().catch(console.error);
