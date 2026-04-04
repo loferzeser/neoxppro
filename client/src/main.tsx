@@ -24,6 +24,23 @@ if (
   document.body.appendChild(s);
 }
 
+console.log("[main.tsx] Starting app initialization");
+
+const trpcClient = trpc.createClient({
+  links: [
+    httpBatchLink({
+      url: getApiUrl("/api/trpc"),
+      transformer: superjson,
+      fetch(input, init) {
+        return globalThis.fetch(input, {
+          ...(init ?? {}),
+          credentials: "include",
+        });
+      },
+    }),
+  ],
+});
+
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
@@ -53,39 +70,16 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
-console.log("[main.tsx] Starting app initialization");
-
-const trpcClient = trpc.createClient({
-  links: [
-    httpBatchLink({
-      url: getApiUrl("/api/trpc"),
-      transformer: superjson,
-      fetch(input, init) {
-        return globalThis.fetch(input, {
-          ...(init ?? {}),
-          credentials: "include",
-        });
-      },
-    }),
-  ],
-});
-
-const queryClient = new QueryClient();
-
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   console.error("[main.tsx] FATAL: #root element not found!");
   document.body.innerHTML = '<div style="color:white;padding:20px;">FATAL: #root not found</div>';
 } else {
   createRoot(rootElement).render(
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </trpc.Provider>
-    );
-  } catch (err) {
-    console.error("[main.tsx] Render error:", err);
-    document.body.innerHTML = `<div style="color:white;padding:20px;">Render Error: ${err}</div>`;
-  }
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
 }
