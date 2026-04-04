@@ -311,6 +311,15 @@ function Footer() {
             <p className="text-white/50 text-sm leading-relaxed max-w-xs">
               แหล่งรวม Expert Advisor (EA) Trading Bots คุณภาพสูง สำหรับนักเทรดมืออาชีพ พร้อมสถิติจริงและการสนับสนุนตลอด 24/7
             </p>
+            <div className="mt-3 text-xs text-white/40">
+              <Link href="/privacy" className="hover:text-[#ccff00] transition-colors underline">
+                นโยบายความเป็นส่วนตัว
+              </Link>
+              {" | "}
+              <Link href="/terms" className="hover:text-[#ccff00] transition-colors underline">
+                ข้อกำหนดการใช้งาน
+              </Link>
+            </div>
             <div className="flex items-center gap-3 mt-4">
               {["fab fa-telegram", "fab fa-discord", "fab fa-twitter", "fab fa-youtube"].map((icon, i) => (
                 <a key={i} href="#" className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center hover:bg-[rgba(204,255,0,0.1)] hover:text-[#ccff00] text-white/50 transition-all">
