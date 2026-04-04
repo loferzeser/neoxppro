@@ -9,6 +9,7 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
+  console.log("[useAuth] Hook called");
   const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
     options ?? {};
   const utils = trpc.useUtils();
@@ -16,6 +17,11 @@ export function useAuth(options?: UseAuthOptions) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+  });
+  console.log("[useAuth] meQuery state:", { 
+    isLoading: meQuery.isLoading, 
+    isError: meQuery.isError, 
+    hasData: !!meQuery.data 
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({
@@ -42,10 +48,14 @@ export function useAuth(options?: UseAuthOptions) {
   }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
+    try {
+      localStorage.setItem(
+        "manus-runtime-user-info",
+        JSON.stringify(meQuery.data)
+      );
+    } catch (err) {
+      console.warn("[useAuth] localStorage.setItem failed:", err);
+    }
     return {
       user: meQuery.data ?? null,
       loading: meQuery.isLoading || logoutMutation.isPending,

@@ -207,18 +207,38 @@ function TradeFeed() {
 
 export default function Home() {
   console.log("[Home] Component rendering");
-  const { isAuthenticated } = useAuth();
-  console.log("[Home] isAuthenticated:", isAuthenticated);
-  const {
-    data: featuredProducts,
-    isLoading,
-    isError,
-    error,
-  } = trpc.products.list.useQuery(
-    { featured: true, limit: 6 },
-    { retry: 1 }
-  );
-  console.log("[Home] tRPC query state:", { isLoading, isError, hasData: !!featuredProducts });
+  
+  let isAuthenticated = false;
+  let featuredProducts = null;
+  let isLoading = true;
+  let isError = false;
+  let error = null;
+
+  try {
+    const auth = useAuth();
+    console.log("[Home] useAuth returned:", { isAuthenticated: auth.isAuthenticated, loading: auth.loading });
+    isAuthenticated = auth.isAuthenticated;
+
+    const query = trpc.products.list.useQuery(
+      { featured: true, limit: 6 },
+      { retry: 1 }
+    );
+    console.log("[Home] tRPC query state:", { isLoading: query.isLoading, isError: query.isError, hasData: !!query.data });
+    featuredProducts = query.data;
+    isLoading = query.isLoading;
+    isError = query.isError;
+    error = query.error;
+  } catch (err) {
+    console.error("[Home] Error in hooks:", err);
+    return (
+      <Layout>
+        <div style={{ color: "white", padding: "20px" }}>
+          <h1>Error loading page</h1>
+          <pre>{String(err)}</pre>
+        </div>
+      </Layout>
+    );
+  }
 
   const kpiData = [
     { value: 118, suffix: "%", label: "Monthly Profit", icon: TrendingUp, color: "#ccff00" },
