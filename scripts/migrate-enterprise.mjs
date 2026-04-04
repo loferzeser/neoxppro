@@ -197,6 +197,7 @@ async function run() {
   console.log("\n=== Creating default admin user ===");
   const adminConn = await mysql.createConnection(process.env.DATABASE_URL);
   const adminEmail = "admin@neoxp.shop";
+  const adminOpenId = `google:admin@neoxp.shop`; // Google OAuth format
   
   try {
     const [existingAdmin] = await adminConn.execute(
@@ -206,8 +207,8 @@ async function run() {
 
     if (existingAdmin.length === 0) {
       await adminConn.execute(
-        "INSERT INTO users (email, name, role, isVerified, isBanned, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
-        [adminEmail, "Admin User", "super_admin", true, false, new Date()]
+        "INSERT INTO users (openId, email, name, role, isVerified, isBanned, loginMethod, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [adminOpenId, adminEmail, "Admin User", "super_admin", true, false, "google", new Date()]
       );
       console.log("✓ Admin user created:", adminEmail);
     } else {
