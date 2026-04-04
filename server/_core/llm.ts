@@ -274,6 +274,9 @@ const normalizeResponseFormat = ({
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   assertApiKey();
 
+  console.log("[LLM] Invoking with", params.messages.length, "messages");
+  console.log("[LLM] Using API:", ENV.openRouterApiKey ? "OpenRouter" : "Forge");
+
   const {
     messages,
     tools,
@@ -289,6 +292,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     model: ENV.openRouterApiKey ? "qwen/qwen-3.6-plus-preview:free" : "gemini-2.5-flash",
     messages: messages.map(normalizeMessage),
   };
+  
+  console.log("[LLM] Model:", payload.model);
 
   if (tools && tools.length > 0) {
     payload.tools = tools;
@@ -335,14 +340,19 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     body: JSON.stringify(payload),
   });
 
+  console.log("[LLM] Response status:", response.status);
+
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("[LLM] Error response:", errorText);
     throw new Error(
       `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
     );
   }
 
-  return (await response.json()) as InvokeResult;
+  const result = (await response.json()) as InvokeResult;
+  console.log("[LLM] Success! Response length:", result.choices?.[0]?.message?.content?.length || 0);
+  return result;
 }
 
 export function extractAssistantText(result: InvokeResult): string {
