@@ -2,7 +2,7 @@ import * as React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Redirect, Route, Router, Switch } from "wouter";
+import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -32,12 +32,19 @@ function AppRoutes() {
 
   console.log("[AppRoutes] BASE_URL:", base, "routerBase:", routerBase);
 
+  // TEMPORARY DEBUG: Render Home directly to test if Router is the issue
+  const [location] = useLocation();
+  console.log("[AppRoutes] Current location:", location);
+
   try {
     console.log("[AppRoutes] About to render Router");
     return (
       <Router {...(routerBase ? { base: routerBase } : {})}>
         <Switch>
-          <Route path="/" component={Home} />
+          <Route path="/">{() => {
+            console.log("[Route /] Rendering Home");
+            return <Home />;
+          }}</Route>
 
         {/* Trailing slashes → canonical paths (must be before /shop/:slug) */}
         <Route path="/shop/">
@@ -77,8 +84,8 @@ function AppRoutes() {
           <Redirect to="/risk" replace />
         </Route>
 
-        <Route path="/shop" component={Shop} />
-        <Route path="/shop/:slug" component={ProductDetail} />
+          <Route path="/shop" component={Shop} />
+          <Route path="/shop/:slug" component={ProductDetail} />
         <Route path="/cart" component={Cart} />
         <Route path="/checkout" component={Checkout} />
         <Route path="/order-success/:orderNumber" component={OrderSuccess} />
