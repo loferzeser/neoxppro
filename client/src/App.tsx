@@ -29,7 +29,26 @@ function AppRoutes() {
   
   // TEMPORARY: Test direct render without Router
   console.log("[AppRoutes] Testing direct Home render");
-  return <Home />;
+  
+  // Ultra simple test
+  return (
+    <div style={{ 
+      position: "fixed", 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0, 
+      background: "red", 
+      color: "white", 
+      padding: "50px",
+      fontSize: "24px",
+      zIndex: 9999 
+    }}>
+      <h1>TEST: If you see this, React is rendering!</h1>
+      <p>AppRoutes is working</p>
+      <Home />
+    </div>
+  );
 }
 
 function App() {
