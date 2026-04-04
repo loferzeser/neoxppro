@@ -289,7 +289,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: ENV.openRouterApiKey ? "qwen/qwen-3.6-plus-preview:free" : "gemini-2.5-flash",
+    model: ENV.openRouterApiKey ? "qwen/qwen-2.5-72b-instruct:free" : "gemini-2.5-flash",
     messages: messages.map(normalizeMessage),
   };
   
