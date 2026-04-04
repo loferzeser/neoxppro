@@ -9,7 +9,7 @@ import { Streamdown } from "streamdown";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation } from "@/lib/router";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 

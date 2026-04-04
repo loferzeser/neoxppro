@@ -1,5 +1,5 @@
 import { ShoppingCart, Star, TrendingUp, Zap } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "@/lib/router";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";

@@ -3,7 +3,7 @@ import ProductCard from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
 import { Bot, Filter, Search, SlidersHorizontal, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useSearch } from "wouter";
+import { useSearch } from "@/lib/router";
 
 const categories = [
   { value: "", label: "ทั้งหมด" },

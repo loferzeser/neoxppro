@@ -14,7 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "@/lib/router";
 import { toast } from "sonner";
 import { useEffect } from "react";
 

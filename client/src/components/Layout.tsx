@@ -30,7 +30,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "@/lib/router";
 import { NotificationBell } from "./NotificationBell";
 import { CookieConsent } from "@/components/CookieConsent";
 import { RISK_BAR_STORAGE_KEY, RiskDisclaimerBar } from "@/components/RiskDisclaimerBar";

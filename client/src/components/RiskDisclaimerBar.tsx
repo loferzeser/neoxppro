@@ -1,6 +1,6 @@
 import { AlertTriangle, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "wouter";
+import { Link } from "@/lib/router";
 
 export const RISK_BAR_STORAGE_KEY = "ea_bot_shop_risk_bar_dismissed_v1";
 

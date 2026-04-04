@@ -1,6 +1,6 @@
 import Layout from "@/components/Layout";
 import { BarChart3, Bot, CheckCircle, Shield, TrendingUp, Users, Zap } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "@/lib/router";
 
 export default function About() {
   const team = [

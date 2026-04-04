@@ -19,7 +19,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation } from "@/lib/router";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 

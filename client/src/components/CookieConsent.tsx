@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link } from "@/lib/router";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "ea_bot_shop_cookie_consent_v1";

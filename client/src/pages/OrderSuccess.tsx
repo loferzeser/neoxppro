@@ -1,10 +1,11 @@
 import Layout from "@/components/Layout";
 import { trpc } from "@/lib/trpc";
 import { CheckCircle, Download, Package, ShoppingBag } from "lucide-react";
-import { Link, useParams } from "wouter";
+import { Link, useParams } from "@/lib/router";
 
-export default function OrderSuccess() {
-  const { orderNumber } = useParams<{ orderNumber: string }>();
+export default function OrderSuccess({ params }: { params?: { orderNumber: string } }) {
+  const routerParams = useParams<{ orderNumber: string }>();
+  const orderNumber = params?.orderNumber || routerParams.orderNumber;
   const { data, isLoading } = trpc.orders.byNumber.useQuery(
     { orderNumber: orderNumber ?? "" },
     { enabled: !!orderNumber }

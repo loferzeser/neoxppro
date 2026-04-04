@@ -1,10 +1,11 @@
 import * as React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
-import { Redirect, Route, Router, Switch } from "wouter";
-import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AIChatWidget } from "./components/AIChatWidget";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+// Import all pages
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
@@ -16,7 +17,7 @@ import Admin from "./pages/Admin";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import AuthPage from "./pages/Auth";
-import { AIChatWidget } from "./components/AIChatWidget";
+import NotFound from "./pages/NotFound";
 import TermsPage from "./pages/legal/Terms";
 import PrivacyPage from "./pages/legal/Privacy";
 import RefundPage from "./pages/legal/Refund";
@@ -24,51 +25,58 @@ import CookiesPage from "./pages/legal/Cookies";
 import RiskDisclosurePage from "./pages/legal/RiskDisclosure";
 import AffiliatePage from "./pages/Affiliate";
 
-function AppRoutes() {
-  console.log("[AppRoutes] Rendering");
-  
-  return (
-    <Router base={undefined}>
-      <Switch>
-        <Route path="/" component={Home} />
-        
-        {/* Redirects for trailing slashes */}
-        <Route path="/shop/"><Redirect to="/shop" replace /></Route>
-        <Route path="/cart/"><Redirect to="/cart" replace /></Route>
-        <Route path="/checkout/"><Redirect to="/checkout" replace /></Route>
-        <Route path="/about/"><Redirect to="/about" replace /></Route>
-        <Route path="/contact/"><Redirect to="/contact" replace /></Route>
-        <Route path="/dashboard/"><Redirect to="/dashboard" replace /></Route>
-        <Route path="/admin/"><Redirect to="/admin" replace /></Route>
-        <Route path="/terms/"><Redirect to="/terms" replace /></Route>
-        <Route path="/privacy/"><Redirect to="/privacy" replace /></Route>
-        <Route path="/refund/"><Redirect to="/refund" replace /></Route>
-        <Route path="/cookies/"><Redirect to="/cookies" replace /></Route>
-        <Route path="/risk/"><Redirect to="/risk" replace /></Route>
+// Simple hash-based router
+function useHashRoute() {
+  const [route, setRoute] = React.useState(() => {
+    const hash = window.location.hash.slice(1) || "/";
+    return hash;
+  });
 
-        <Route path="/shop" component={Shop} />
-        <Route path="/shop/:slug" component={ProductDetail} />
-        <Route path="/cart" component={Cart} />
-        <Route path="/checkout" component={Checkout} />
-        <Route path="/order-success/:orderNumber" component={OrderSuccess} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/dashboard/orders" component={Dashboard} />
-        <Route path="/dashboard/settings" component={Dashboard} />
-        <Route path="/admin" component={Admin} />
-        <Route path="/about" component={About} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/auth" component={AuthPage} />
-        <Route path="/terms" component={TermsPage} />
-        <Route path="/privacy" component={PrivacyPage} />
-        <Route path="/refund" component={RefundPage} />
-        <Route path="/cookies" component={CookiesPage} />
-        <Route path="/risk" component={RiskDisclosurePage} />
-        <Route path="/affiliate" component={AffiliatePage} />
-        <Route path="/404" component={NotFound} />
-        <Route component={NotFound} />
-      </Switch>
-    </Router>
-  );
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) || "/";
+      setRoute(hash);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  return route;
+}
+
+function AppRoutes() {
+  const route = useHashRoute();
+  console.log("[AppRoutes] Current route:", route);
+
+  // Match routes
+  if (route === "/" || route === "") return <Home />;
+  if (route === "/shop") return <Shop />;
+  if (route.startsWith("/shop/")) {
+    const slug = route.split("/")[2];
+    return <ProductDetail params={{ slug }} />;
+  }
+  if (route === "/cart") return <Cart />;
+  if (route === "/checkout") return <Checkout />;
+  if (route.startsWith("/order-success/")) {
+    const orderNumber = route.split("/")[2];
+    return <OrderSuccess params={{ orderNumber }} />;
+  }
+  if (route === "/dashboard") return <Dashboard />;
+  if (route === "/dashboard/orders") return <Dashboard />;
+  if (route === "/dashboard/settings") return <Dashboard />;
+  if (route === "/admin") return <Admin />;
+  if (route === "/about") return <About />;
+  if (route === "/contact") return <Contact />;
+  if (route === "/auth") return <AuthPage />;
+  if (route === "/terms") return <TermsPage />;
+  if (route === "/privacy") return <PrivacyPage />;
+  if (route === "/refund") return <RefundPage />;
+  if (route === "/cookies") return <CookiesPage />;
+  if (route === "/risk") return <RiskDisclosurePage />;
+  if (route === "/affiliate") return <AffiliatePage />;
+  
+  return <NotFound />;
 }
 
 function App() {

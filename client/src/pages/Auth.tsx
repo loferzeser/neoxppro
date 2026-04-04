@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Bot, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
+import { useLocation } from "@/lib/router";
 import { getApiUrl } from "@/lib/runtimeConfig";
 
 export default function AuthPage() {

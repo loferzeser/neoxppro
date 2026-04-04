@@ -1,5 +1,5 @@
 import { Bot, Home } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "@/lib/router";
 
 export default function NotFound() {
   return (

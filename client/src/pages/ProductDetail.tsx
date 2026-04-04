@@ -15,7 +15,7 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { Link, useParams } from "wouter";
+import { Link, useParams } from "@/lib/router";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -26,8 +26,9 @@ const categoryLabels: Record<string, string> = {
   tool: "Tools",
 };
 
-export default function ProductDetail() {
-  const { slug } = useParams<{ slug: string }>();
+export default function ProductDetail({ params }: { params?: { slug: string } }) {
+  const routerParams = useParams<{ slug: string }>();
+  const slug = params?.slug || routerParams.slug;
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
   const [activeTab, setActiveTab] = useState<"overview" | "specs" | "reviews">("overview");

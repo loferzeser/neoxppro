@@ -13,7 +13,7 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "@/lib/router";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 

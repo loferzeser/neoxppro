@@ -17,7 +17,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "@/lib/router";
 import { useEffect, useRef, useState } from "react";
 
 // ===== ANIMATED COUNTER =====
