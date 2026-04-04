@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -97,6 +98,25 @@ function AppRoutes() {
 }
 
 function App() {
+  const [hasError, setHasError] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error("[Global Error]", event.error);
+      setHasError(true);
+    };
+    window.addEventListener("error", handleError);
+    return () => window.removeEventListener("error", handleError);
+  }, []);
+
+  if (hasError) {
+    return (
+      <div style={{ padding: "20px", color: "white", background: "#000" }}>
+        <h1>Error detected - check console</h1>
+      </div>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
