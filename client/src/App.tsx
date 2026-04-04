@@ -2,7 +2,7 @@ import * as React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Redirect, Route, Router, Switch, useLocation } from "wouter";
+import { Redirect, Route, Router, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -27,27 +27,47 @@ import AffiliatePage from "./pages/Affiliate";
 function AppRoutes() {
   console.log("[AppRoutes] Rendering");
   
-  // TEMPORARY: Test direct render without Router
-  console.log("[AppRoutes] Testing direct Home render");
-  
-  // Ultra simple test
   return (
-    <div style={{ 
-      position: "fixed", 
-      top: 0, 
-      left: 0, 
-      right: 0, 
-      bottom: 0, 
-      background: "red", 
-      color: "white", 
-      padding: "50px",
-      fontSize: "24px",
-      zIndex: 9999 
-    }}>
-      <h1>TEST: If you see this, React is rendering!</h1>
-      <p>AppRoutes is working</p>
-      <Home />
-    </div>
+    <Router base={undefined}>
+      <Switch>
+        <Route path="/" component={Home} />
+        
+        {/* Redirects for trailing slashes */}
+        <Route path="/shop/"><Redirect to="/shop" replace /></Route>
+        <Route path="/cart/"><Redirect to="/cart" replace /></Route>
+        <Route path="/checkout/"><Redirect to="/checkout" replace /></Route>
+        <Route path="/about/"><Redirect to="/about" replace /></Route>
+        <Route path="/contact/"><Redirect to="/contact" replace /></Route>
+        <Route path="/dashboard/"><Redirect to="/dashboard" replace /></Route>
+        <Route path="/admin/"><Redirect to="/admin" replace /></Route>
+        <Route path="/terms/"><Redirect to="/terms" replace /></Route>
+        <Route path="/privacy/"><Redirect to="/privacy" replace /></Route>
+        <Route path="/refund/"><Redirect to="/refund" replace /></Route>
+        <Route path="/cookies/"><Redirect to="/cookies" replace /></Route>
+        <Route path="/risk/"><Redirect to="/risk" replace /></Route>
+
+        <Route path="/shop" component={Shop} />
+        <Route path="/shop/:slug" component={ProductDetail} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/order-success/:orderNumber" component={OrderSuccess} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard/orders" component={Dashboard} />
+        <Route path="/dashboard/settings" component={Dashboard} />
+        <Route path="/admin" component={Admin} />
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/terms" component={TermsPage} />
+        <Route path="/privacy" component={PrivacyPage} />
+        <Route path="/refund" component={RefundPage} />
+        <Route path="/cookies" component={CookiesPage} />
+        <Route path="/risk" component={RiskDisclosurePage} />
+        <Route path="/affiliate" component={AffiliatePage} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Router>
   );
 }
 
