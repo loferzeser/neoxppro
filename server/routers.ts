@@ -724,7 +724,24 @@ export const appRouter = router({
           productContext: z.any().optional().nullable(),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ ctx, input }) => {
+        // Rate limiting
+        const { checkRateLimit } = await import("./aiRateLimiter");
+        const userId = ctx.user?.id.toString() || null;
+        const ip = ctx.req.ip || ctx.req.socket.remoteAddress || "unknown";
+        
+        const rateLimit = checkRateLimit(userId, ip);
+        
+        if (!rateLimit.allowed) {
+          const resetIn = Math.ceil((rateLimit.resetAt - Date.now()) / 1000 / 60);
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: `Rate limit exceeded. Please try again in ${resetIn} minutes.`,
+          });
+        }
+        
+        console.log(`[AI Chat] User: ${userId || "anonymous"}, IP: ${ip}, Remaining: ${rateLimit.remaining}`);
+        
         const msgs = buildAiMessages({
           userMessages: input.messages,
           productContext: input.productContext ?? undefined,
