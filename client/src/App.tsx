@@ -32,10 +32,12 @@ function AppRoutes() {
 
   console.log("[AppRoutes] BASE_URL:", base, "routerBase:", routerBase);
 
-  return (
-    <Router {...(routerBase ? { base: routerBase } : {})}>
-      <Switch>
-        <Route path="/" component={Home} />
+  try {
+    console.log("[AppRoutes] About to render Router");
+    return (
+      <Router {...(routerBase ? { base: routerBase } : {})}>
+        <Switch>
+          <Route path="/" component={Home} />
 
         {/* Trailing slashes → canonical paths (must be before /shop/:slug) */}
         <Route path="/shop/">
@@ -97,7 +99,11 @@ function AppRoutes() {
         <Route component={NotFound} />
       </Switch>
     </Router>
-  );
+    );
+  } catch (error) {
+    console.error("[AppRoutes] Error rendering Router:", error);
+    return <div style={{ color: "white", padding: "20px" }}>Router Error: {String(error)}</div>;
+  }
 }
 
 function App() {

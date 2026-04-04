@@ -206,7 +206,9 @@ function TradeFeed() {
 }
 
 export default function Home() {
+  console.log("[Home] Component rendering");
   const { isAuthenticated } = useAuth();
+  console.log("[Home] isAuthenticated:", isAuthenticated);
   const {
     data: featuredProducts,
     isLoading,
@@ -216,6 +218,7 @@ export default function Home() {
     { featured: true, limit: 6 },
     { retry: 1 }
   );
+  console.log("[Home] tRPC query state:", { isLoading, isError, hasData: !!featuredProducts });
 
   const kpiData = [
     { value: 118, suffix: "%", label: "Monthly Profit", icon: TrendingUp, color: "#ccff00" },

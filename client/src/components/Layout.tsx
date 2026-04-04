@@ -377,7 +377,7 @@ function Footer() {
 
 // ===== MAIN LAYOUT =====
 export default function Layout({ children }: { children: React.ReactNode }) {
-  console.log("[Layout] Rendering");
+  console.log("[Layout] Rendering, children:", !!children);
   const [riskDismissed, setRiskDismissed] = useState(() => {
     if (typeof window === "undefined") return true;
     try {
@@ -394,6 +394,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const mainTop = riskDismissed ? "pt-24" : "pt-[8.5rem]";
+  console.log("[Layout] About to render DOM");
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
