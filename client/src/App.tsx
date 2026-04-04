@@ -47,7 +47,6 @@ function useHashRoute() {
 
 function AppRoutes() {
   const route = useHashRoute();
-  console.log("[AppRoutes] Current route:", route);
 
   // Match routes
   if (route === "/" || route === "") return <Home />;
@@ -80,11 +79,9 @@ function AppRoutes() {
 }
 
 function App() {
-  console.log("[App] Component rendering");
   const [hasError, setHasError] = React.useState(false);
 
   React.useEffect(() => {
-    console.log("[App] Mounted");
     const handleError = (event: ErrorEvent) => {
       console.error("[Global Error]", event.error);
       setHasError(true);
@@ -108,7 +105,6 @@ function App() {
     );
   }
 
-  console.log("[App] Rendering children");
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">

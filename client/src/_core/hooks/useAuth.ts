@@ -9,7 +9,6 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  console.log("[useAuth] Hook called");
   const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
     options ?? {};
   const utils = trpc.useUtils();
@@ -17,11 +16,6 @@ export function useAuth(options?: UseAuthOptions) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
-  });
-  console.log("[useAuth] meQuery state:", { 
-    isLoading: meQuery.isLoading, 
-    isError: meQuery.isError, 
-    hasData: !!meQuery.data 
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({

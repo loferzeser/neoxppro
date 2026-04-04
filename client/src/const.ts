@@ -14,7 +14,7 @@ export const getLoginUrl = () => {
   if (!oauthPortalUrl || !appId) {
     // Avoid crashing the whole app when env isn't configured (e.g., static Pages deploy).
     // Backend/OAuth must be configured separately for real sign-in.
-    return "/auth";
+    return "/#/auth";
   }
 
   let url: URL;
@@ -22,7 +22,7 @@ export const getLoginUrl = () => {
     // Supports absolute or relative portal URL.
     url = new URL(`${oauthPortalUrl.replace(/\/$/, "")}/app-auth`, window.location.origin);
   } catch {
-    return "/auth";
+    return "/#/auth";
   }
 
   url.searchParams.set("appId", appId);

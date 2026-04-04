@@ -206,8 +206,6 @@ function TradeFeed() {
 }
 
 export default function Home() {
-  console.log("[Home] Component rendering");
-  
   let isAuthenticated = false;
   let featuredProducts = null;
   let isLoading = true;
@@ -216,14 +214,12 @@ export default function Home() {
 
   try {
     const auth = useAuth();
-    console.log("[Home] useAuth returned:", { isAuthenticated: auth.isAuthenticated, loading: auth.loading });
     isAuthenticated = auth.isAuthenticated;
 
     const query = trpc.products.list.useQuery(
       { featured: true, limit: 6 },
       { retry: 1 }
     );
-    console.log("[Home] tRPC query state:", { isLoading: query.isLoading, isError: query.isError, hasData: !!query.data });
     featuredProducts = query.data;
     isLoading = query.isLoading;
     isError = query.isError;
