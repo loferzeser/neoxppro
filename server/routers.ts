@@ -712,7 +712,7 @@ export const appRouter = router({
 
   // ===== AI CHAT =====
   aiChat: router({
-    sendMessage: publicProcedure
+    sendMessage: protectedProcedure // เปลี่ยนจาก publicProcedure เป็น protectedProcedure
       .input(
         z.object({
           messages: z.array(
@@ -725,9 +725,9 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        // Rate limiting
+        // Rate limiting (เฉพาะ user ที่ login แล้ว)
         const { checkRateLimit } = await import("./aiRateLimiter");
-        const userId = ctx.user?.id.toString() || null;
+        const userId = ctx.user.id.toString();
         const ip = ctx.req.ip || ctx.req.socket.remoteAddress || "unknown";
         
         const rateLimit = checkRateLimit(userId, ip);
@@ -736,11 +736,11 @@ export const appRouter = router({
           const resetIn = Math.ceil((rateLimit.resetAt - Date.now()) / 1000 / 60);
           throw new TRPCError({
             code: "TOO_MANY_REQUESTS",
-            message: `Rate limit exceeded. Please try again in ${resetIn} minutes.`,
+            message: `คุณใช้ AI เกินจำนวนที่กำหนด (${USER_LIMIT} ข้อความ/ชั่วโมง) กรุณารออีก ${resetIn} นาที`,
           });
         }
         
-        console.log(`[AI Chat] User: ${userId || "anonymous"}, IP: ${ip}, Remaining: ${rateLimit.remaining}`);
+        console.log(`[AI Chat] User: ${ctx.user.email}, Remaining: ${rateLimit.remaining}/${USER_LIMIT}`);
         
         const msgs = buildAiMessages({
           userMessages: input.messages,
@@ -748,7 +748,7 @@ export const appRouter = router({
         });
         const result = await invokeLLM({ messages: msgs });
         const content = extractAssistantText(result);
-        return { content };
+        return { content, remaining: rateLimit.remaining };
       }),
   }),
 
