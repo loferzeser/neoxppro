@@ -11,10 +11,10 @@ interface TickerData {
   up: boolean;
 }
 
-// Cache ข้อมูล 30 วินาที เพื่อประหยัด API calls
+// Cache ข้อมูล 15 นาที เพื่อประหยัด API calls
 let cachedData: TickerData[] | null = null;
 let lastFetch = 0;
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 900000; // 15 minutes (900 seconds)
 
 export async function getMarketData(): Promise<TickerData[]> {
   const now = Date.now();

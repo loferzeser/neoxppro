@@ -38,8 +38,8 @@ import { RISK_BAR_STORAGE_KEY, RiskDisclaimerBar } from "@/components/RiskDiscla
 // ===== LIVE TICKER =====
 function LiveTicker() {
   const { data: marketData } = trpc.market.ticker.useQuery(undefined, {
-    refetchInterval: 30000, // รีเฟรชทุก 30 วินาที
-    staleTime: 25000,
+    refetchInterval: 900000, // รีเฟรชทุก 15 นาที
+    staleTime: 840000, // 14 นาที
   });
   
   const [prices, setPrices] = useState(marketData ?? []);
