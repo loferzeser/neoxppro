@@ -152,9 +152,9 @@ function Header() {
         <nav className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] flex items-center justify-center shadow-[0_0_15px_rgba(204,255,0,0.4)] group-hover:shadow-[0_0_25px_rgba(204,255,0,0.6)] transition-shadow relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ccff00]/20 to-transparent"></div>
-              <span className="text-[#ccff00] font-black text-xl relative z-10" style={{ fontFamily: 'Space Grotesk, sans-serif', textShadow: '0 0 10px rgba(204,255,0,0.5)' }}>N</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#9b87f5] to-[#7c3aed] flex items-center justify-center shadow-[0_0_20px_rgba(155,135,245,0.4)] group-hover:shadow-[0_0_30px_rgba(155,135,245,0.6)] transition-all relative">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#ccff00]/10 to-transparent"></div>
+              <span className="text-[#ccff00] font-black text-2xl relative z-10 drop-shadow-[0_0_8px_rgba(204,255,0,0.8)]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>N</span>
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-white font-bold text-lg tracking-tight">
@@ -304,9 +304,9 @@ function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#ccff00]/20 to-transparent"></div>
-                <span className="text-[#ccff00] font-black text-xl relative z-10" style={{ fontFamily: 'Space Grotesk, sans-serif', textShadow: '0 0 10px rgba(204,255,0,0.5)' }}>N</span>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#9b87f5] to-[#7c3aed] flex items-center justify-center relative">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#ccff00]/10 to-transparent"></div>
+                <span className="text-[#ccff00] font-black text-2xl relative z-10 drop-shadow-[0_0_8px_rgba(204,255,0,0.8)]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>N</span>
               </div>
               <span className="text-white font-bold text-xl">NEO<span className="text-[#ccff00]">XP</span> Store</span>
             </div>
