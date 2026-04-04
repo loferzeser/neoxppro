@@ -36,21 +36,20 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { RISK_BAR_STORAGE_KEY, RiskDisclaimerBar } from "@/components/RiskDisclaimerBar";
 
 // ===== LIVE TICKER =====
-const tickerData = [
-  { pair: "XAU/USD", price: "2,341.80", change: "+0.42%", up: true },
-  { pair: "EUR/USD", price: "1.0834", change: "-0.11%", up: false },
-  { pair: "GBP/USD", price: "1.2662", change: "+0.07%", up: true },
-  { pair: "USD/JPY", price: "149.82", change: "+0.23%", up: true },
-  { pair: "BTC/USD", price: "67,420", change: "+1.84%", up: true },
-  { pair: "ETH/USD", price: "3,521", change: "+2.12%", up: true },
-  { pair: "NAS100", price: "18,234", change: "+0.55%", up: true },
-  { pair: "SPX500", price: "5,102", change: "-0.08%", up: false },
-  { pair: "AUD/USD", price: "0.6548", change: "+0.14%", up: true },
-  { pair: "USD/CAD", price: "1.3612", change: "-0.19%", up: false },
-];
-
 function LiveTicker() {
-  const [prices, setPrices] = useState(tickerData);
+  const { data: marketData } = trpc.market.ticker.useQuery(undefined, {
+    refetchInterval: 30000, // รีเฟรชทุก 30 วินาที
+    staleTime: 25000,
+  });
+  
+  const [prices, setPrices] = useState(marketData ?? []);
+
+  // อัพเดทเมื่อได้ข้อมูลใหม่จาก API
+  useEffect(() => {
+    if (marketData) {
+      setPrices(marketData);
+    }
+  }, [marketData]);
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -771,6 +771,14 @@ export const appRouter = router({
       }),
   }),
 
+  // ===== MARKET DATA =====
+  market: router({
+    ticker: publicProcedure.query(async () => {
+      const { getMarketData } = await import("./marketDataService");
+      return getMarketData();
+    }),
+  }),
+
   // ===== ADMIN =====
   admin: router({
     stats: dashboardProcedure.query(async () => {
