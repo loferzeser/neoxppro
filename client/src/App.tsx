@@ -32,6 +32,11 @@ function AppRoutes() {
 
   console.log("[AppRoutes] BASE_URL:", base, "routerBase:", routerBase);
 
+  // TEMPORARY: Test direct render without Router
+  console.log("[AppRoutes] Testing direct Home render");
+  return <Home />;
+
+  /* DISABLED FOR TESTING
   // TEMPORARY DEBUG: Render Home directly to test if Router is the issue
   const [location] = useLocation();
   console.log("[AppRoutes] Current location:", location);
@@ -102,15 +107,16 @@ function AppRoutes() {
         <Route path="/cookies" component={CookiesPage} />
         <Route path="/risk" component={RiskDisclosurePage} />
         <Route path="/affiliate" component={AffiliatePage} />
-        <Route path="/404" component={NotFound} />
-        <Route component={NotFound} />
-      </Switch>
-    </Router>
+          <Route path="/404" component={NotFound} />
+          <Route component={NotFound} />
+        </Switch>
+      </Router>
     );
   } catch (error) {
     console.error("[AppRoutes] Error rendering Router:", error);
     return <div style={{ color: "white", padding: "20px" }}>Router Error: {String(error)}</div>;
   }
+  */
 }
 
 function App() {
