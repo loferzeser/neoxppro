@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-// Alpha Vantage API (ฟรี 25-500 requests/วัน)
-const ALPHA_VANTAGE_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo";
-const BASE_URL = "https://www.alphavantage.co/query";
+// Twelve Data API (ฟรี 800 requests/วัน, real-time data)
+const TWELVE_DATA_KEY = process.env.TWELVE_DATA_API_KEY || "";
+const BASE_URL = "https://api.twelvedata.com";
 
 interface TickerData {
   pair: string;
@@ -24,29 +24,52 @@ export async function getMarketData(): Promise<TickerData[]> {
     return cachedData;
   }
 
-  try {
-    // ดึงข้อมูลจริงจาก Alpha Vantage
-    const [forex1, forex2, forex3, crypto1, crypto2] = await Promise.all([
-      fetchForex("EUR", "USD"),
-      fetchForex("GBP", "USD"),
-      fetchForex("USD", "JPY"),
-      fetchCrypto("BTC"),
-      fetchCrypto("ETH"),
-    ]);
+  // ถ้าไม่มี API key ใช้ fallback
+  if (!TWELVE_DATA_KEY) {
+    console.warn("TWELVE_DATA_API_KEY not set, using fallback data");
+    return getFallbackData();
+  }
 
-    const data: TickerData[] = [
-      forex1,
-      forex2,
-      forex3,
-      crypto1,
-      crypto2,
-      // Fallback สำหรับ indices (Alpha Vantage ฟรีไม่มี indices)
-      { pair: "NAS100", price: "18,234", change: "+0.55%", up: true },
-      { pair: "SPX500", price: "5,102", change: "-0.08%", up: false },
-      { pair: "AUD/USD", price: "0.6548", change: "+0.14%", up: true },
-      { pair: "USD/CAD", price: "1.3612", change: "-0.19%", up: false },
-      { pair: "XAU/USD", price: "2,341.80", change: "+0.42%", up: true },
+  try {
+    // ดึงข้อมูลจริงจาก Twelve Data (รองรับ batch request)
+    const symbols = [
+      "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD",
+      "BTC/USD", "ETH/USD", "XAU/USD",
+      "NDX", "SPX" // Nasdaq 100 & S&P 500
     ];
+    
+    const url = `${BASE_URL}/quote?symbol=${symbols.join(",")}&apikey=${TWELVE_DATA_KEY}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    
+    // Twelve Data returns object with symbol keys for batch requests
+    const data: TickerData[] = [];
+    
+    for (const symbol of symbols) {
+      const quote = json[symbol];
+      if (!quote || quote.code === 400) continue;
+      
+      const price = parseFloat(quote.close || quote.price || "0");
+      const change = parseFloat(quote.percent_change || "0");
+      
+      // Format display name
+      let displayName = symbol;
+      if (symbol === "NDX") displayName = "NAS100";
+      if (symbol === "SPX") displayName = "SPX500";
+      
+      data.push({
+        pair: displayName,
+        price: price > 1000 
+          ? price.toLocaleString("en-US", { maximumFractionDigits: 0 })
+          : price.toFixed(4),
+        change: `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`,
+        up: change >= 0,
+      });
+    }
+
+    if (data.length === 0) {
+      throw new Error("No data received from API");
+    }
 
     cachedData = data;
     lastFetch = now;
@@ -56,46 +79,6 @@ export async function getMarketData(): Promise<TickerData[]> {
     // Fallback เป็นข้อมูลสมมติถ้า API ล้ม
     return getFallbackData();
   }
-}
-
-async function fetchForex(from: string, to: string): Promise<TickerData> {
-  const url = `${BASE_URL}?function=CURRENCY_EXCHANGE_RATE&from_currency=${from}&to_currency=${to}&apikey=${ALPHA_VANTAGE_KEY}`;
-  
-  const res = await fetch(url);
-  const data = await res.json();
-  
-  const rate = data["Realtime Currency Exchange Rate"];
-  if (!rate) throw new Error("No forex data");
-  
-  const price = parseFloat(rate["5. Exchange Rate"]);
-  const change = parseFloat(rate["9. Change Percent"].replace("%", ""));
-  
-  return {
-    pair: `${from}/${to}`,
-    price: price.toFixed(4),
-    change: `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`,
-    up: change >= 0,
-  };
-}
-
-async function fetchCrypto(symbol: string): Promise<TickerData> {
-  const url = `${BASE_URL}?function=CURRENCY_EXCHANGE_RATE&from_currency=${symbol}&to_currency=USD&apikey=${ALPHA_VANTAGE_KEY}`;
-  
-  const res = await fetch(url);
-  const data = await res.json();
-  
-  const rate = data["Realtime Currency Exchange Rate"];
-  if (!rate) throw new Error("No crypto data");
-  
-  const price = parseFloat(rate["5. Exchange Rate"]);
-  const change = parseFloat(rate["9. Change Percent"].replace("%", ""));
-  
-  return {
-    pair: `${symbol}/USD`,
-    price: price > 1000 ? price.toLocaleString("en-US", { maximumFractionDigits: 0 }) : price.toFixed(2),
-    change: `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`,
-    up: change >= 0,
-  };
 }
 
 function getFallbackData(): TickerData[] {
