@@ -118,6 +118,12 @@ export function registerGoogleOAuthRoutes(app: Express) {
       });
 
       const cookieOptions = getSessionCookieOptions(req);
+      console.log("[Google OAuth] Setting cookie:", {
+        name: COOKIE_NAME,
+        options: cookieOptions,
+        maxAge: ONE_YEAR_MS,
+        redirectTo: getPostLoginRedirect(),
+      });
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
       res.redirect(302, getPostLoginRedirect());
     } catch (err) {

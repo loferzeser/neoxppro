@@ -34,10 +34,14 @@ export function getSessionCookieOptions(
   const secure = isSecureRequest(req) || process.env.NODE_ENV === "production";
   const sameSite = secure && !isLocalHost ? "none" : "lax";
 
+  // Explicit domain for cross-domain cookies (Railway backend → Cloudflare frontend)
+  const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+
   return {
     httpOnly: true,
     path: "/",
     sameSite,
     secure,
+    ...(cookieDomain && !isLocalHost ? { domain: cookieDomain } : {}),
   };
 }
