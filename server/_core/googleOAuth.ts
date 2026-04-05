@@ -117,15 +117,14 @@ export function registerGoogleOAuthRoutes(app: Express) {
         expiresInMs: ONE_YEAR_MS,
       });
 
+      const frontendUrl = getPostLoginRedirect();
       const cookieOptions = getSessionCookieOptions(req);
-      console.log("[Google OAuth] Setting cookie:", {
-        name: COOKIE_NAME,
-        options: cookieOptions,
-        maxAge: ONE_YEAR_MS,
-        redirectTo: getPostLoginRedirect(),
-      });
+
+      // Try setting cookie directly (works if same domain)
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-      res.redirect(302, getPostLoginRedirect());
+
+      // Also pass token via URL hash so frontend can store it (cross-domain fallback)
+      res.redirect(302, `${frontendUrl}/#/auth/callback?token=${encodeURIComponent(sessionToken)}`);
     } catch (err) {
       console.error("[Google OAuth] Failed:", err);
       res.redirect(302, `${getPostLoginRedirect()}/auth?error=server_error`);

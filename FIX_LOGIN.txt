@@ -1,0 +1,41 @@
+แก้ปัญหา Google Login ไม่ขึ้นเมนูบัญชี
+=====================================
+
+ทำตามขั้นตอนนี้:
+
+1. ไปที่ Railway Dashboard
+   https://railway.app/project/[your-project]
+
+2. เลือก Service: neoxppro
+
+3. ไปที่แท็บ "Variables"
+
+4. กด "New Variable" เพิ่มตัวแปรนี้:
+   
+   Name:  COOKIE_DOMAIN
+   Value: .neoxp.shop
+   
+   ⚠️ สำคัญ: ต้องมีจุด (.) ข้างหน้า
+
+5. กด "Add" แล้ว Railway จะ redeploy อัตโนมัติ
+
+6. รอ deploy เสร็จ (ประมาณ 1-2 นาที)
+
+7. ทดสอบ:
+   - เปิด https://neoxp.shop
+   - กด "เข้าสู่ระบบ"
+   - เลือก "ลงชื่อเข้าใช้ด้วย Google"
+   - หลัง login ควรเห็นเมนูบัญชีที่มุมขวาบน
+
+ตรวจสอบว่าได้ผล:
+- กด F12 → Console
+- พิมพ์: document.cookie
+- ควรเห็น: ea-bot-shop-session=...
+
+ถ้ายังไม่ได้:
+- ลอง Clear Cookies (F12 → Application → Cookies → ลบทั้งหมด)
+- ลอง login ใหม่
+- ดู Railway Logs ว่ามี error อะไร
+
+โค้ดถูก push ไปที่ GitHub แล้ว
+Railway จะ auto-deploy

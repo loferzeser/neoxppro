@@ -24,6 +24,7 @@ import RefundPage from "./pages/legal/Refund";
 import CookiesPage from "./pages/legal/Cookies";
 import RiskDisclosurePage from "./pages/legal/RiskDisclosure";
 import AffiliatePage from "./pages/Affiliate";
+import AuthCallback from "./pages/AuthCallback";
 
 // Simple hash-based router
 function useHashRoute() {
@@ -68,6 +69,7 @@ function AppRoutes() {
   if (route === "/about") return <About />;
   if (route === "/contact") return <Contact />;
   if (route === "/auth") return <AuthPage />;
+  if (route.startsWith("/auth/callback")) return <AuthCallback />;
   if (route === "/terms") return <TermsPage />;
   if (route === "/privacy") return <PrivacyPage />;
   if (route === "/refund") return <RefundPage />;
