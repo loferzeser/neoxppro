@@ -193,32 +193,46 @@ async function run() {
   await conn.end();
   console.log("Migration complete!");
 
-  // Create default admin user
+  // Create default admin user (email/password login)
   console.log("\n=== Creating default admin user ===");
+  const { randomBytes, scrypt: _scrypt } = await import("crypto");
+  const { promisify } = await import("util");
+  const scrypt = promisify(_scrypt);
+
+  async function hashPassword(password) {
+    const salt = randomBytes(16).toString("hex");
+    const derived = await scrypt(password, salt, 64);
+    return `${salt}:${derived.toString("hex")}`;
+  }
+
   const adminConn = await mysql.createConnection(process.env.DATABASE_URL);
-  const adminEmail = "admin@neoxp.shop";
-  const adminOpenId = `google:admin@neoxp.shop`; // Google OAuth format
-  
+  const adminEmail = "support@neoxp.shop";
+  const adminPassword = "adminneoxpshop680231";
+  const adminOpenId = `local:${adminEmail}`;
+
   try {
-    const [existingAdmin] = await adminConn.execute(
+    const [existing] = await adminConn.execute(
       "SELECT id FROM users WHERE email = ?",
       [adminEmail]
     );
 
-    if (existingAdmin.length === 0) {
+    const passwordHash = await hashPassword(adminPassword);
+
+    if (existing.length === 0) {
       await adminConn.execute(
-        "INSERT INTO users (openId, email, name, role, isVerified, isBanned, loginMethod, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [adminOpenId, adminEmail, "Admin User", "super_admin", true, false, "google", new Date()]
+        "INSERT INTO users (openId, email, name, role, isVerified, isBanned, loginMethod, passwordHash, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [adminOpenId, adminEmail, "Admin", "super_admin", true, false, "password", passwordHash, new Date()]
       );
       console.log("✓ Admin user created:", adminEmail);
     } else {
       await adminConn.execute(
-        "UPDATE users SET role = ?, isVerified = ?, isBanned = ? WHERE email = ?",
-        ["super_admin", true, false, adminEmail]
+        "UPDATE users SET role = 'super_admin', isVerified = 1, isBanned = 0, passwordHash = ?, openId = ?, loginMethod = 'password' WHERE email = ?",
+        [passwordHash, adminOpenId, adminEmail]
       );
       console.log("✓ Admin user updated:", adminEmail);
     }
-    console.log("Login with Google using:", adminEmail);
+    console.log("Login at: https://neoxp.shop/#/auth");
+    console.log("Email:", adminEmail);
   } catch (err) {
     console.warn("⚠ Admin user setup failed:", err.message);
   } finally {
