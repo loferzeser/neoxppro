@@ -20,6 +20,7 @@ export function useAuth(options?: UseAuthOptions) {
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
+      localStorage.removeItem("app_session_id");
       utils.auth.me.setData(undefined, null);
     },
   });
