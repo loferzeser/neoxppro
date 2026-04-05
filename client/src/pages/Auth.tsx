@@ -15,11 +15,19 @@ export default function AuthPage() {
   const [showPass, setShowPass] = useState(false);
 
   const login = trpc.auth.loginWithPassword.useMutation({
-    onSuccess: () => { toast.success("เข้าสู่ระบบสำเร็จ"); navigate("/"); },
+    onSuccess: (data) => {
+      if (data.token) localStorage.setItem("app_session_id", data.token);
+      toast.success("เข้าสู่ระบบสำเร็จ");
+      window.location.replace("/#/");
+    },
     onError: (e) => toast.error(e.message),
   });
   const register = trpc.auth.registerWithPassword.useMutation({
-    onSuccess: () => { toast.success("สร้างบัญชีสำเร็จ"); navigate("/"); },
+    onSuccess: (data) => {
+      if (data.token) localStorage.setItem("app_session_id", data.token);
+      toast.success("สร้างบัญชีสำเร็จ");
+      window.location.replace("/#/");
+    },
     onError: (e) => toast.error(e.message),
   });
 
