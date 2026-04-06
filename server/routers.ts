@@ -696,6 +696,23 @@ export const appRouter = router({
           quantity: item.quantity,
         }));
 
+        // Apply coupon discount by reducing the first item's price
+        const discountAmount = Number(order.discountAmount ?? 0);
+        if (discountAmount > 0) {
+          let remaining = discountAmount;
+          for (const item of checkoutItems) {
+            const itemTotal = item.price * item.quantity;
+            if (remaining >= itemTotal) {
+              item.price = 0;
+              remaining -= itemTotal;
+            } else {
+              item.price = Math.max(0, (itemTotal - remaining) / item.quantity);
+              remaining = 0;
+              break;
+            }
+          }
+        }
+
         const sessionUrl = await createCheckoutSession({
           items: checkoutItems,
           orderNumber: input.orderNumber,
