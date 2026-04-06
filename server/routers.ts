@@ -55,6 +55,7 @@ import {
   listProductLicenses,
 } from "./db";
 import { notifyOwner } from "./_core/notification";
+import { triggerN8n } from "./n8nService";
 import { nanoid } from "nanoid";
 import { buildAiMessages } from "./aiChatCore";
 import { invokeLLM, extractAssistantText } from "./_core/llm";
@@ -179,6 +180,8 @@ export const appRouter = router({
         const token = await sdk.createSessionToken(openId, { name: input.name.trim(), expiresInMs: ONE_YEAR_MS });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        // n8n trigger
+        triggerN8n("user.registered", { name: input.name.trim(), email, loginMethod: "password" });
         return { success: true as const, token };
       }),
     loginWithPassword: publicProcedure
@@ -559,10 +562,18 @@ export const appRouter = router({
           })
         );
 
+        // n8n trigger
+        triggerN8n("order.created", {
+          orderNumber,
+          totalAmount: finalAmount,
+          discountAmount,
+          customerEmail: input.customerEmail ?? ctx.user.email ?? "",
+          customerName: input.customerName ?? ctx.user.name ?? "",
+          paymentMethod: input.paymentMethod,
+        });
+
         return { orderNumber, orderId: order.id, totalAmount: finalAmount, discountAmount };
       }),
-
-    // Update order after Stripe payment
     confirmPayment: protectedProcedure
       .input(
         z.object({

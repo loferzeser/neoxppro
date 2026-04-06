@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import { constructWebhookEvent } from "../stripe";
 import { updateOrderStatus, clearCart, getOrderByNumber, upsertWebhookEvent } from "../db";
 import { notifyOwner } from "./notification";
+import { triggerN8n } from "../n8nService";
 import { buildAiMessages } from "../aiChatCore";
 import { streamAssistantChunks } from "./llm";
 import { createRateLimiter } from "./rateLimit";
@@ -104,6 +105,14 @@ async function startServer() {
               title: `Payment confirmed: ${orderNumber}`,
               content: `Order ${orderNumber} is paid via Stripe. Total: ฿${order.totalAmount}. Customer: ${order.customerName ?? session.customer_email ?? "N/A"}`,
             });
+            // Trigger n8n workflow
+            await triggerN8n("order.paid", {
+              orderNumber,
+              totalAmount: order.totalAmount,
+              customerName: order.customerName ?? session.customer_email ?? "",
+              customerEmail: order.customerEmail ?? session.customer_email ?? "",
+              stripeSessionId: session.id,
+            });
             console.log(`[Stripe Webhook] Order ${orderNumber} marked as paid`);
             await upsertWebhookEvent({
               provider: "stripe",
@@ -172,6 +181,31 @@ async function startServer() {
 
   app.get("/api/healthz", (_req, res) => {
     res.json({ ok: true, uptime: process.uptime() });
+  });
+
+  // ===== N8N INCOMING WEBHOOK =====
+  // n8n can POST to this endpoint to trigger actions in the shop
+  // Secure with N8N_SECRET header
+  app.post("/api/n8n/trigger", express.json(), async (req, res) => {
+    const secret = process.env.N8N_SECRET;
+    if (secret && req.headers["x-n8n-secret"] !== secret) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const { action, data } = req.body as { action?: string; data?: Record<string, unknown> };
+    console.log(`[n8n] Incoming action: ${action}`, data);
+
+    try {
+      if (action === "ping") {
+        res.json({ ok: true, message: "n8n connected to NEOXP" });
+        return;
+      }
+      // Future: handle actions like create_product, send_email, etc.
+      res.json({ ok: true, action, received: true });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      res.status(500).json({ error: msg });
+    }
   });
 
   // AI chat SSE (streaming; complements tRPC aiChat.sendMessage)

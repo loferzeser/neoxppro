@@ -26,6 +26,9 @@ export const ENV = {
   frontendAppUrl: process.env.FRONTEND_APP_URL ?? "http://localhost:5173",
   csrfSecret: process.env.CSRF_SECRET ?? "",
   sentryDsn: process.env.SENTRY_DSN ?? "",
+  // n8n
+  n8nWebhookUrl: process.env.N8N_WEBHOOK_URL ?? "",
+  n8nSecret: process.env.N8N_SECRET ?? "",
   // S3
   s3Bucket: process.env.S3_BUCKET ?? "",
   s3Endpoint: process.env.S3_ENDPOINT ?? "",
