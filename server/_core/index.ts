@@ -200,7 +200,43 @@ async function startServer() {
         res.json({ ok: true, message: "n8n connected to NEOXP" });
         return;
       }
-      // Future: handle actions like create_product, send_email, etc.
+
+      // Auto-create product from AI-generated data
+      if (action === "create_product") {
+        const { insertProduct } = await import("../db");
+        const d = data as any;
+        if (!d?.name || !d?.price) {
+          res.status(400).json({ error: "name and price are required" });
+          return;
+        }
+        // Generate slug from name
+        const slug = d.name
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .slice(0, 80) + "-" + Date.now().toString(36);
+
+        await insertProduct({
+          name: d.name,
+          slug,
+          description: d.description ?? "",
+          shortDescription: d.shortDescription ?? d.description?.slice(0, 160) ?? "",
+          price: String(d.price),
+          salePrice: d.salePrice ? String(d.salePrice) : null,
+          category: d.category ?? "scalping",
+          platform: d.platform ?? "MT4/MT5",
+          isActive: false, // draft — admin reviews before publishing
+          isFeatured: false,
+          fileUrl: d.fileUrl ?? null,
+          imageUrl: d.imageUrl ?? null,
+          tags: d.tags ?? null,
+        } as any);
+
+        console.log(`[n8n] Product created (draft): ${d.name}`);
+        res.json({ ok: true, action, slug, message: "Product created as draft. Review in Admin panel." });
+        return;
+      }
+
       res.json({ ok: true, action, received: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
