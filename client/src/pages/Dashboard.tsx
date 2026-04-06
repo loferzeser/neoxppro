@@ -133,6 +133,7 @@ function PurchasesTab() {
 // ===== ORDERS TAB =====
 function OrdersTab() {
   const { data: orders, isLoading } = trpc.orders.myOrders.useQuery();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
     pending: { label: "รอชำระเงิน", color: "#ff9500", bg: "rgba(255,149,0,0.1)" },
@@ -167,42 +168,92 @@ function OrdersTab() {
     <div className="space-y-3">
       {orders.map((order) => {
         const s = statusConfig[order.status] ?? statusConfig.pending;
+        const isExpanded = expandedId === order.id;
         return (
-          <div key={order.id} className="cyber-card p-5">
-            <div className="flex items-center justify-between">
+          <div key={order.id} className="cyber-card overflow-hidden">
+            <div className="p-5 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-white font-bold text-sm">{order.orderNumber}</span>
-                  <span
-                    className="px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{ color: s.color, background: s.bg }}
-                  >
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ color: s.color, background: s.bg }}>
                     {s.label}
                   </span>
                 </div>
                 <div className="text-white/40 text-xs">
-                  {new Date(order.createdAt).toLocaleDateString("th-TH", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {new Date(order.createdAt).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-[#ccff00] font-bold">฿{Number(order.totalAmount).toLocaleString()}</div>
-                <Link
-                  href={`/dashboard/orders`}
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : order.id)}
                   className="flex items-center gap-1 text-white/40 text-xs hover:text-[#ccff00] transition-colors mt-1"
                 >
-                  ดูรายละเอียด <ExternalLink className="w-3 h-3" />
-                </Link>
+                  {isExpanded ? "ซ่อน" : "ดูรายละเอียด"} <ExternalLink className="w-3 h-3" />
+                </button>
               </div>
             </div>
+            {isExpanded && (
+              <OrderDetail orderNumber={order.orderNumber} status={order.status} />
+            )}
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function OrderDetail({ orderNumber, status }: { orderNumber: string; status: string }) {
+  const { data, isLoading } = trpc.orders.byNumber.useQuery({ orderNumber });
+  const createStripeSession = trpc.checkout.createSession.useMutation();
+  const [processing, setProcessing] = useState(false);
+
+  const handlePay = async () => {
+    setProcessing(true);
+    try {
+      const { url } = await createStripeSession.mutateAsync({
+        orderNumber,
+        origin: window.location.origin,
+        paymentMethod: "card",
+      });
+      window.open(url, "_blank");
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  if (isLoading) return <div className="px-5 pb-5 text-white/40 text-sm">กำลังโหลด...</div>;
+  if (!data) return <div className="px-5 pb-5 text-white/40 text-sm">ไม่พบข้อมูล</div>;
+
+  return (
+    <div className="px-5 pb-5 border-t border-[rgba(255,255,255,0.06)] pt-4 space-y-2">
+      {data.items.map((item) => (
+        <div key={item.id} className="flex justify-between text-sm">
+          <span className="text-white/70">{item.productName} × {item.quantity}</span>
+          <span className="text-white font-medium">฿{Number(item.price).toLocaleString()}</span>
+        </div>
+      ))}
+      {Number(data.discountAmount) > 0 && (
+        <div className="flex justify-between text-sm text-[#ccff00]">
+          <span>ส่วนลด</span>
+          <span>-฿{Number(data.discountAmount).toLocaleString()}</span>
+        </div>
+      )}
+      <div className="flex justify-between text-sm font-bold border-t border-[rgba(255,255,255,0.06)] pt-2">
+        <span className="text-white">รวม</span>
+        <span className="text-[#ccff00]">฿{Number(data.totalAmount).toLocaleString()}</span>
+      </div>
+      {status === "pending" && (
+        <button
+          onClick={handlePay}
+          disabled={processing}
+          className="mt-3 w-full py-2.5 rounded-xl bg-[#ccff00] text-black text-sm font-bold hover:bg-[#a0cc00] transition-all disabled:opacity-60"
+        >
+          {processing ? "กำลังเชื่อมต่อ..." : "ชำระเงินตอนนี้"}
+        </button>
+      )}
     </div>
   );
 }
